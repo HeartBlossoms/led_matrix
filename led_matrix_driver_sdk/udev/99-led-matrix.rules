@@ -1,0 +1,19 @@
+# 99-led-matrix.rules
+#
+# 为 CH347 的 SPI/I2C HID 接口创建固定软链接 /dev/led_spi，
+# 这样上层应用不需要再关心 /dev/hidrawN 的动态编号。
+#
+# 安装方法：
+#   sudo cp 99-led-matrix.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules
+#   sudo udevadm trigger --subsystem-match=hidraw
+# 或者重新插拔 CH347。
+#
+# 注意：
+# - CH347 在 HID 模式下通常会枚举出两个 hidraw 节点：
+#   interface 0 对应 UART，interface 1 对应 SPI/I2C。
+#   这里只给 SPI/I2C 接口创建 led_spi 软链接。
+# - 如果目标设备的接口路径不是 :1.1，请根据实际 DEVPATH 修改规则。
+
+# 直接映射为 /dev/led_spi
+ACTION=="add|change", SUBSYSTEM=="hidraw", KERNELS=="0003:1A86:55DC.*", ENV{DEVPATH}=="*:1.1/*", SYMLINK+="led_spi", MODE="0666"
